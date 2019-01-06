@@ -8,3 +8,4 @@ Binary Indexed tree
 Minimum Edit distance
 Longest palindromic substring
 Boyer–Moore Pattern searching
+KMP pattern Searching
