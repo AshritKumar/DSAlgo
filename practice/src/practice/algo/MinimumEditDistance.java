@@ -1,5 +1,9 @@
 package practice.algo;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.IntStream;
+
 public class MinimumEditDistance {
 	
 	public static int minimumEditDistanceRecursive(String s1, String s2, int s1len, int s2len) {
@@ -46,9 +50,46 @@ public class MinimumEditDistance {
 		}
 		
 		//printArray(distArr);
+		printEditSteps(distArr, s1, s2);
 		return distArr[s1.length()][s2.length()];
 	}
 	
+	private static void printEditSteps(int[][] distArr, String s1, String s2) {
+		int i=distArr.length-1, j=distArr[0].length-1;
+		char s1c[] = s1.toCharArray();
+		StringBuffer sb = new StringBuffer(new String(s1c));
+		while(true) {
+			
+			if(i == 0 || j == 0)
+				break;
+			
+			if(s1.charAt(i-1) == s2.charAt(j-1)) {
+				i--;j--;
+			}
+			// transformation in s1
+			else if(distArr[i-1][j-1]+1 == distArr[i][j]) {
+				System.out.print("Transform "+s1.charAt(i-1)+" in "+sb+" to "+s2.charAt(j-1)+" --> ");
+				sb.replace(i-1, i, String.valueOf(s2.charAt(j-1)));
+				System.out.println(sb);
+				i--;j--;
+			}
+			// deletion in s1
+			else if(distArr[i-1][j]+1 == distArr[i][j]) {
+				System.out.print("Delete "+s1.charAt(i-1)+" in "+sb+" --> ");
+				sb.deleteCharAt(i-1);
+				System.out.println(sb);
+				i--;
+			}
+			// addtion in s1
+			else if(distArr[i][j-1]+1 == distArr[i][j]) {
+				System.out.print("Add "+s2.charAt(j-1)+" to "+s1+" --> ");
+				sb.insert(i, s2.charAt(j-1));
+				System.out.println(sb);
+				j--;
+			}
+		}
+	}
+
 	private static void printArray(int[][] distArr) {
 		for(int i=0; i<distArr.length; i++) {
 			for(int j=0; j<distArr[i].length; j++)
@@ -64,7 +105,8 @@ public class MinimumEditDistance {
 	
 	
 	public static void main(String[] args) {
-		System.out.println(minumEditDistanceDynamic("hakunamatata","hakurata"));
+		System.out.println(minumEditDistanceDynamic("GTATGXYKJAHYTSYSYJSYSKJSYSUJSIUS","GTATGXYKHYTSYSKJSYSKJSYSUJSIKS"));
+        
 	}
 
 }
