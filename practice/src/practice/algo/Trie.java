@@ -157,7 +157,7 @@ public class Trie {
 				"bot","fun","main","mad","movie","move","ace","acer","notification","note","notice","none","nun","come","cone","Cote"});
 		//t.getAsList();
 		System.out.println(t.getTotalInternalNodes());
-		System.out.println(t.search("ma", false));
+		System.out.println(t.search("ma", true));
 		System.out.println(t.getWordsWith(""));
 		System.out.println(t.getSize());
 		t.delete("ant");
