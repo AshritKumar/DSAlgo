@@ -1,7 +1,7 @@
 package practice;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 
 public class test1 {
@@ -35,19 +35,7 @@ public class test1 {
 		l.add(3, 30);
 		l.remove(1);
 		l.get(1);*/
-		
-		practice.algo.LinkedList<Integer> pl = new practice.algo.LinkedList<>();
-		pl.sortedInsert(10);
-		pl.sortedInsert(4);
-		pl.sortedInsert(6);
-		pl.sortedInsert(19);
-		pl.sortedInsert(100);
-		pl.sortedInsert(5);
-		pl.sortedInsert(-1);
-		pl.sortedInsert(3);
-		pl.sortedInsert(45);
-		pl.delete(1);
-		System.out.println(pl);
+		sortLargest();
 		
 		
 	}
@@ -57,6 +45,20 @@ public class test1 {
 		System.out.println(al.hashCode());
 		for(String s : al)
 			System.out.println(s);
+	}
+	
+	public static void sortLargest() {
+		List<Integer> al = new ArrayList<>();
+		al.add(10);
+		al.add(969);
+		al.add(9);
+		al.sort((i1,i2) -> {
+			String s1 = i1.toString();
+			String s2 = i2.toString();
+			return (s2+s1).compareTo(s1+s2);
+		});
+		System.out.println(al);
+		System.out.println("a".compareTo("a"));
 	}
 	
 		

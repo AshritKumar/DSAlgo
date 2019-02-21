@@ -83,7 +83,7 @@ public class DateCalcUtil {
 
 	public static void main(String[] args) {
 		String dt1 = "13-6-2018";
-		String dt2 = "12-6-2000";
+		String dt2 = "13-6-2019";
 		String dt11 [] = dt1.split("-");
 		String dt22[] = dt2.split("-");
 		int[] date1 = new int[3];
