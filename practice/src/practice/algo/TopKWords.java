@@ -38,7 +38,7 @@ public class TopKWords {
 			  if (((HeapNode)n1).freq >((HeapNode)n2).freq) return -1;
 			  else if (((HeapNode)n1).freq < ((HeapNode)n2).freq) return 1; 
 			  return ((HeapNode)n1).word.compareTo((((HeapNode)n2).word)); });
-		 
+		  
 		for (HeapNode node : mh.nodes)
 			tkw.add(node.word);
 	//	 Collections.reverse(tkw);
