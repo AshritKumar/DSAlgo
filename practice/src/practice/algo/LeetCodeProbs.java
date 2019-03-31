@@ -77,7 +77,72 @@ public class LeetCodeProbs {
 		 return count;
 		
 	}
+//-----------------------------	 
+	 //https://leetcode.com/problems/find-k-th-smallest-pair-distance/
 	 
+	 /**approach 1
+	  * Generate all the pairs, keep a Max hep with diff of pairs with k size*/
+
+	 public int smallestDistancePairHeap(int[] nums, int k) {
+		 PriorityQueue<Integer> maxHeap = new PriorityQueue<>(k, Collections.reverseOrder());
+		 for(int i =0; i<nums.length; i++) {
+			 for(int j= i+1; j<nums.length; j++) {
+				 if(maxHeap.size() < k)
+					 maxHeap.offer(Math.abs(nums[j] - nums[i]));
+				 else {
+					 if(maxHeap.peek() > Math.abs(nums[j] - nums[i])) {
+						 maxHeap.poll();
+						 maxHeap.offer(Math.abs(nums[j] - nums[i]));
+					 }
+				 }
+			 }
+		 }
+		 // O(N^2 ln(k)) => O(N^2 ln(N^2))
+		 System.out.println(maxHeap.peek());
+		 return maxHeap.peek();
+		
+	 }
+	 
+	 /**Approach 2
+	  * Sort the array, min diff of pairs can be 0 and max diff can be nums[len-1] - nums[0]
+	  * mid is (min+max)/2
+	  * count number of pairs with difference less than mid
+	  * if count is >= k that means we have shift our mid to left => min = mid
+	  * if count is <, we have to shift our mid to right max = mid+1
+	  * iterate till min < max, at the end min will point to kth smallest distance pair*/
+	 public int smallestDistanceParirBS(int[] nums, int k) {
+		 Arrays.sort(nums);
+		 printArr(nums);
+		 // lowest diff can be 0
+		 int min = 0;
+		 // highest diff can be nums[len-1] - nums[0]
+		 int max = nums[nums.length-1] - nums[0];
+		 int mid = (min + max )/ 2;
+		 while(min < max) {
+			 mid = (min + max)/2;
+			 System.out.println("Lo = "+min+", hi = "+max+", mid = "+mid);
+			 int count = 0;
+			 int st = 0;
+			 // count all pairs whose difference is <= mid
+			 for(int end=0; end<nums.length; end++) {
+				 while(nums[end] - nums[st] > mid) {
+					 ++st;
+				 }
+				 System.out.println("Mid = "+ mid+", count for "+nums[end]+" is "+ (end - st));
+				 count += end - st;
+			 }
+			 System.out.println("Total count less than "+mid+" "+ count);
+			 if (count >= k) {
+				 max = mid;
+			 } else {
+				 min = mid+1;
+			 }
+		 }
+		 System.out.println(min);
+		 return min;
+	 }
+	 
+	 // approach 3
 	 public int smallestDistancePair(int[] nums, int k) {
 		 Arrays.sort(nums);
 		 printArr(nums);
@@ -122,13 +187,13 @@ public class LeetCodeProbs {
 		 return lo;
 	 }
 	 
-
+//------------------------------------------------------------------------------------
 	public static void main(String[] args) {
 		 LeetCodeProbs lps = new LeetCodeProbs();
 		// System.out.println(lps.find132pattern(new int[] {6, 12, 3, 4, 6, 11, 20}));
 		 //lps.kthSmallest(new int[][] {{1,  5,  9}, {10, 11, 13}, {12, 13, 15} }, 8);
 		 //int v = lps.kthSmallestinMulTable(42, 34, 401);
-		 lps.smallestDistancePairHeap(new int[] {1, 3, 6, 5, 6, 2, 9, 3},  1);
+		 lps.smallestDistanceParirBS(new int[] {1, 3, 6, 5, 6, 2, 9, 3},  8);
 	}
 	
 	private void printArr(int [] arr) {
@@ -138,24 +203,10 @@ public class LeetCodeProbs {
 	}
 	
 	
-	 public int smallestDistancePairHeap(int[] nums, int k) {
-		 PriorityQueue<Integer> maxHeap = new PriorityQueue<>(k, Collections.reverseOrder());
-		 for(int i =0; i<nums.length; i++) {
-			 for(int j= i+1; j<nums.length; j++) {
-				 if(maxHeap.size() < k)
-					 maxHeap.offer(Math.abs(nums[j] - nums[i]));
-				 else {
-					 if(maxHeap.peek() > Math.abs(nums[j] - nums[i])) {
-						 maxHeap.poll();
-						 maxHeap.offer(Math.abs(nums[j] - nums[i]));
-					 }
-				 }
-			 }
-		 }
-		 // O(N^2 ln(k)) => O(N^2 ln(N^2))
-		 return maxHeap.peek();
-		
-	 }
+	
+	 
+	 
+	
 	
 	
 	
