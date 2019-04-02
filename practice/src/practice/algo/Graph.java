@@ -1,15 +1,20 @@
 package practice.algo;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.Stack;
 
 // Undirected graph and Directed graph
 public class Graph {
-	
+	private Map<String,Vertex> vrtxMap = new HashMap<>();
 	private Map<Vertex, Set<Vertex>> allVrtx = new HashMap<>();
 	private Set<Edge> allEdges = new HashSet<>();
 	
@@ -128,25 +133,36 @@ public class Graph {
 	}
 	
 	public void addVertex(Vertex v) {
-		if(allVrtx.containsKey(v))
+		if(allVrtx.containsKey(v.label))
 			return;
 		else {
+			vrtxMap.put(v.label, v);
 			allVrtx.put(v, new HashSet<>());
 		}
 	}
 	
 	public void addEdge(String s1, String s2, boolean isDirected) {
-		Vertex v1 = new Vertex(s1);
-		Vertex v2 = new Vertex(s2);
+		Vertex v1 = null;
+		Vertex v2 = null;
+		if(! vrtxMap.containsKey(s1)) {
+			v1 = new Vertex(s1);
+			allVrtx.put(v1, new HashSet<>());
+			vrtxMap.put(v1.label, v1);
+		} else {
+			v1 = vrtxMap.get(s1);
+		}
+		if(! vrtxMap.containsKey(s2)) {
+			v2 = new Vertex(s2);
+			allVrtx.put(v2, new HashSet<>());
+			vrtxMap.put(v2.label, v2);
+		} else {
+			v2 = vrtxMap.get(s2);
+		}
 		addEdge(v1, v2, isDirected);
 	}
 	
 	public void addEdge(Vertex v1, Vertex v2, boolean isDirected) {
-		if(! allVrtx.containsKey(v1))
-			allVrtx.put(v1, new HashSet<>());
-		if(! allVrtx.containsKey(v2))
-			allVrtx.put(v2, new HashSet<>());
-		
+	
 		// add v2 as v1 adj vrtx and edge
 		allVrtx.get(v1).add(v2);
 		v1.addEdge(v2, isDirected);
@@ -158,14 +174,15 @@ public class Graph {
 	}
 	
 	public void removeVertex(String label) {
-		Vertex v = new Vertex(label);
-		removeVertex(v);
+		removeVertex(vrtxMap.get(label));
 	}
 
 	public void removeVertex(Vertex v) {
 		// remove vertex and its edges (adj vertx)
-		if(allVrtx.containsKey(v)) {
+		if(v!= null && vrtxMap.containsKey(v.label)) {
 			allVrtx.remove(v);
+			// remove from vertex map
+			vrtxMap.remove(v.label);
 			v.edges = null;
 			
 			// remove V from any of the other directed edges
@@ -195,54 +212,194 @@ public class Graph {
 		
 	}
 	
-	private void removeEdge(String s1, String s2, boolean isDirected) {
-		Vertex v1 = new Vertex(s1);
-		Vertex v2 = new Vertex(s2);
-		removeEdge(v1, v2, isDirected);
+	public void removeEdge(String s1, String s2, boolean isDirected) {
+		removeEdge(vrtxMap.get(s1), vrtxMap.get(s2), isDirected);
 		
 	}
 	
 	public void removeEdge(Vertex src,  Vertex dest, boolean isDirected) {
-		allVrtx.get(src).remove(dest);
 		Edge e = new Edge(src, dest, isDirected);
-		src.edges.remove(e);
-		if(! isDirected) {
-			allVrtx.get(dest).remove(src);
-			dest.edges.remove(e);
+		if(allEdges.contains(e)) {
+			allVrtx.get(src).remove(dest);
+			src.edges.remove(e);
+			if(! isDirected) {
+				allVrtx.get(dest).remove(src);
+				dest.edges.remove(e);
+			}
+			allEdges.remove(e);
 		}
-		allEdges.remove(e);
 	}
 	
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		for(Vertex v: allVrtx.keySet())
-			sb.append(v).append(" => ").append(allVrtx.get(v)).append("\n");
+			sb.append(v.label).append(" => ").append(allVrtx.get(v)).append("\n");
 		return sb.toString();
 	}
 	
 
 	public static void main(String[] args) {
 		Graph g = new Graph();
-		g.addEdge("Mumbai", "Pune", true);
-		g.addEdge("Hyderabad", "Mumbai", true);
-		g.addVertex("England");
+		g.addEdge("Mumbai", "Pune", false);
+		g.addEdge("Mumbai", "Hyderabad", false);
+		
 		g.addEdge("Hyderabad", "England", false);
-		g.addEdge("England", "Hyderabad", false);
+		
+		g.addEdge("England", "Pune", false);
+		g.addEdge("England", "Falaknuma", false);
+		
+		g.addEdge("Pune", "NewYork", false);
+		
+		g.addEdge("NewYork", "Malakpet", false);
+		
+		g.addEdge("Malakpet", "Mumbai", false);
+		g.addEdge("Malakpet", "Pune", false);
+		g.addEdge("Malakpet", "Falaknuma", false);
+		
+		// disconnected parts
+		
+		g.addEdge("Mouto", "Kerguelen Islands", false);
+		g.addEdge("Mouto", "Pitcairn Islands", false);
+		
+		g.addEdge("Yangon", "Port Blair", false);
+		g.addEdge("Port Blair", "Interview Island", false);
+		g.addEdge("Interview Island","Subashgram", false);
 		
 		System.out.println(g);
-		System.out.println(g.allEdges+"\n");
 		
-		g.removeEdge("Hyderabad", "England", false);
-		
-		System.out.println(g);
-		System.out.println(g.allEdges);
 		/*
-		 * for(Vertex v : g.allVrtx.keySet()) { System.out.println(v.edges); }
+		 * for(Vertex v : g.allVrtx.keySet()) System.out.println(v.label+" "+v.edges);
 		 */
+		//g.doDFSTraverse("England");
+		//g.BFSIter(g.vrtxMap.get("Mumbai"), g.vrtxMap.get("NewYork"));
+		g.getShortestPath("Falaknuma", "Mumbai");
 		
 	}
-
 	
+	public void doDFSTraverse(String vertex) {
+		//DFSRecursive(vrtxMap.get(vertex), new HashSet<String>());
+		DFSIterative(vrtxMap.get(vertex));
+		System.out.println();
+	}
+	public void DFSRecursive(Vertex v, Set<String> visited) {
+		visited.add(v.label);
+		System.out.print(v.label+" ---> ");
+		for(Vertex av : allVrtx.get(v)) {
+			if(! visited.contains(av.label)) {
+				visited.add(av.label);
+				DFSRecursive(av, visited);
+			}
+		}
+	}
+	
+	public void DFSIterative(Vertex v) {
+		Set<String> visited = new HashSet<String>();
+		Stack<Vertex> stack = new Stack<>();
+		stack.push(v);
+		visited.add(v.label);
+		System.out.print(v.label);
+		while(! stack.isEmpty()) {
+			Vertex vrt = stack.pop();
+			// push all the adj nodes of v into stack
+			for(Vertex avx : allVrtx.get(vrt)) {
+				if(! visited.contains(avx.label)) {
+					System.out.print(" ----> "+avx.label);
+					stack.push(avx);
+					visited.add(avx.label);
+				}
+			}
+		}
+	}
+	
+	// to traverse even disconnected components
+	public void DeepDFS() {
+		// to count no of disconnected components, works correctly only for undirected graph(if there are disconnected componnets)
+		int count = 0;
+		Set<String> visited = new HashSet<String>();
+		// iterate through all vertices
+		for(Vertex vr : allVrtx.keySet()) {
+			if(! visited.contains(vr.label)) {
+			//	visited.add(vr.label);
+				DFSRecursive(vr, visited);
+				System.out.println();
+				++count;
+			}
+		}
+		//System.out.println(count);
+	}
+	
+	private List<Object[]> BFSIter(Vertex v, Vertex vd) {
+		// list for shortest path
+		List<Object[]> pathList = new ArrayList<>();
+		// to count no. of levels
+		int level = 0;
+		LinkedList<Vertex> queue = new LinkedList<>();
+		HashSet<String> visited = new HashSet<>();
+		queue.add(v);
+		queue.add(null);
+		visited.add(v.label);
+		System.out.print(v.label+"("+level+")");
+		pathList.add(new Object[] {v, level});
+		++level;
+		while(! queue.isEmpty()) {
+			Vertex vr = queue.poll();
+			//System.out.println(" -  "+level);
+			if(vr != null) {
+				for(Vertex avx : allVrtx.get(vr)) {
+					if(! visited.contains(avx.label)) {
+						queue.add(avx);
+						visited.add(avx.label);
+						System.out.print(" ----> "+avx.label+"("+level+")");
+						// add to path list to construct the shortest path
+						pathList.add(new Object[] {avx, level});
+						if(avx.label.equals(vd != null ? vd.label : null))
+							return pathList;
+					}
+				}
+			} else if(! queue.isEmpty()){
+				// if encountered a null it means one level is completed
+				++level;
+				// add null at end to mark for another level
+				queue.add(null);
+			}
+		}
+		return pathList;
+	}
+	
+	public List<String> getShortestPath(String src, String dstn) {
+		LinkedList<String> actualPath = new LinkedList<>();
+		Vertex dstnVrtx = vrtxMap.get(dstn);
+		Vertex srcVrtx = vrtxMap.get(src);
+		//actualPath.add(src);
+		if(! src.equals(dstn) && dstnVrtx != null && srcVrtx != null) {
+			List<Object[]> pathList = BFSIter(srcVrtx, dstnVrtx);
+			int prevLvl = (int) pathList.get(pathList.size()-1)[1];
+			//System.out.print("\n"+pathList.get(pathList.size()-1)[0]);
+			actualPath.push(pathList.get(pathList.size()-1)[0].toString());
+			for(int i=pathList.size()-2; i>=0; i--) {
+				Vertex v = (Vertex)pathList.get(i)[0];
+				int lvl = (int) pathList.get(i)[1];
+				if(allVrtx.get(dstnVrtx).contains(v) && lvl != prevLvl) {
+					//System.out.print(" ---> "+v.label);
+					actualPath.push(v.label);
+					prevLvl = lvl;
+					dstnVrtx = v;
+				}
+			}
+			if(! dstnVrtx.equals(srcVrtx)) {
+				System.err.println("\nNo Path Found");
+				return null;
+			}
+			System.out.println("\n"+actualPath);
+			return actualPath;
+		}
+		System.err.println("Invalid vertices given");
+		return null;
+	}
+	
+	public List<Object[]> doBfs(String src) {
+		return BFSIter(vrtxMap.get(src), null);
+	}
 
 }
