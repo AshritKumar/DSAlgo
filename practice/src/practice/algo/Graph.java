@@ -14,9 +14,24 @@ import java.util.Stack;
 
 // Undirected graph and Directed graph
 public class Graph {
+	// Map between  label and Vertex
 	private Map<String,Vertex> vrtxMap = new HashMap<>();
+	// Map to store all adj vertices of a vertex
 	private Map<Vertex, Set<Vertex>> allVrtx = new HashMap<>();
+	// Set of all edges in graph	
 	private Set<Edge> allEdges = new HashSet<>();
+	
+	public Map<String,Vertex> getVertexMap(){
+		return vrtxMap;
+	}
+	
+	public Map<Vertex, Set<Vertex>> getVertexAllVertices(){
+		return allVrtx;
+	}
+	
+	public Set<Edge> getAllEdges(){
+		return allEdges;
+	}
 	
 	class Vertex{
 		private String label;
@@ -33,6 +48,18 @@ public class Graph {
 			Edge e = new Edge(this, dest, weight, isDircected);
 			this.edges.add(e);
 			Graph.this.allEdges.add(e); allEdges.contains(e);
+		}
+		
+		public Set<Edge> getEdgeSet(){
+			return edges;
+		}
+		
+		public String getLabel() {
+			return this.label;
+		}
+		
+		public void setLabel(String label) {
+			this.label = label;
 		}
 		
 		@Override
@@ -69,14 +96,30 @@ public class Graph {
 	}
 	
 	class Edge{
-		Vertex v1;
-		Vertex v2;
-		double weight;
-		boolean isDirected;
+		private Vertex v1;
+		private Vertex v2;
+		private double weight;
+		private boolean isDirected;
 		public Edge(Vertex v1, Vertex v2, boolean isDirected) {
 			this.v1 = v1;
 			this.v2 = v2;
 			this.isDirected = isDirected;
+		}
+		
+		public Vertex getSourceVertex() {
+			return v1;
+		}
+		
+		public Vertex getDestinationVertex() {
+			return v2;
+		}
+		
+		public double getEdgeWeight() {
+			return weight;
+		}
+		
+		public boolean isDireced() {
+			return isDirected;
 		}
 		
 		@Override
@@ -122,7 +165,7 @@ public class Graph {
 		
 		@Override
 		public String toString() {
-			return v1.label+ (isDirected ? " ----> ": " ------ ")+ v2.label;
+			return v1.label+ (isDirected ? " ----> ": " ------ ")+ v2.label + "( "+weight+" )";
 		}
 		
 	}
@@ -133,7 +176,7 @@ public class Graph {
 	}
 	
 	public void addVertex(Vertex v) {
-		if(allVrtx.containsKey(v.label))
+		if(vrtxMap.containsKey(v.label))
 			return;
 		else {
 			vrtxMap.put(v.label, v);
@@ -142,6 +185,10 @@ public class Graph {
 	}
 	
 	public void addEdge(String s1, String s2, boolean isDirected) {
+		addEdge(s1, s2, isDirected, 0.0d);
+	}
+	
+	public void addEdge(String s1, String s2, boolean isDirected, double weight) {
 		Vertex v1 = null;
 		Vertex v2 = null;
 		if(! vrtxMap.containsKey(s1)) {
@@ -158,18 +205,18 @@ public class Graph {
 		} else {
 			v2 = vrtxMap.get(s2);
 		}
-		addEdge(v1, v2, isDirected);
+		addEdge(v1, v2, isDirected, weight);
 	}
 	
-	public void addEdge(Vertex v1, Vertex v2, boolean isDirected) {
+	public void addEdge(Vertex v1, Vertex v2, boolean isDirected, double weight) {
 	
 		// add v2 as v1 adj vrtx and edge
 		allVrtx.get(v1).add(v2);
-		v1.addEdge(v2, isDirected);
+		v1.addEdge(v2, weight, isDirected);
 		if(! isDirected) {
 			// add v1 as v2 adj vrtx and edge
 			allVrtx.get(v2).add(v1);
-			v2.addEdge(v1, isDirected);
+			v2.addEdge(v1, weight, isDirected);
 		}
 	}
 	
@@ -238,44 +285,6 @@ public class Graph {
 		return sb.toString();
 	}
 	
-
-	public static void main(String[] args) {
-		Graph g = new Graph();
-		g.addEdge("Mumbai", "Pune", false);
-		g.addEdge("Mumbai", "Hyderabad", false);
-		
-		g.addEdge("Hyderabad", "England", false);
-		
-		g.addEdge("England", "Pune", false);
-		g.addEdge("England", "Falaknuma", false);
-		
-		g.addEdge("Pune", "NewYork", false);
-		
-		g.addEdge("NewYork", "Malakpet", false);
-		
-		g.addEdge("Malakpet", "Mumbai", false);
-		g.addEdge("Malakpet", "Pune", false);
-		g.addEdge("Malakpet", "Falaknuma", false);
-		
-		// disconnected parts
-		
-		g.addEdge("Mouto", "Kerguelen Islands", false);
-		g.addEdge("Mouto", "Pitcairn Islands", false);
-		
-		g.addEdge("Yangon", "Port Blair", false);
-		g.addEdge("Port Blair", "Interview Island", false);
-		g.addEdge("Interview Island","Subashgram", false);
-		
-		System.out.println(g);
-		
-		/*
-		 * for(Vertex v : g.allVrtx.keySet()) System.out.println(v.label+" "+v.edges);
-		 */
-		//g.doDFSTraverse("England");
-		//g.BFSIter(g.vrtxMap.get("Mumbai"), g.vrtxMap.get("NewYork"));
-		g.getShortestPath("Falaknuma", "Mumbai");
-		
-	}
 	
 	public void doDFSTraverse(String vertex) {
 		//DFSRecursive(vrtxMap.get(vertex), new HashSet<String>());
@@ -401,5 +410,72 @@ public class Graph {
 	public List<Object[]> doBfs(String src) {
 		return BFSIter(vrtxMap.get(src), null);
 	}
+	// topological sort
+	
+	public Stack<Vertex> topSort(String src) {
+		Set<String> visited = new HashSet<>();
+		Stack<Vertex> topOrder = new Stack<>();
+		if (src != null) {
+			Vertex sv = vrtxMap.get(src);
+			visited.add(src);
+			topSortDFS(sv, topOrder,visited);
+		}
+		for (Vertex v : allVrtx.keySet()) {
+			if (! visited.contains(v.label)) {
+				visited.add(v.label);
+				topSortDFS(v, topOrder, visited);
+			}
+		}
+		return topOrder;
+	}
+
+	private void topSortDFS(Vertex sv, Stack<Vertex> topOrder, Set<String> visited) {
+		for(Vertex v : allVrtx.get(sv)) {
+			if (!visited.contains(v.label)) {
+				visited.add(v.label);
+				topSortDFS(v, topOrder, visited);
+			}
+		}
+		topOrder.push(sv);
+		
+	}
+	
+	public void doTopologicOrdering(String src) {
+		Stack<Vertex> topOrder = topSort(src);
+		while (!topOrder.isEmpty()) {
+			System.out.print(topOrder.pop()+" ");
+		}
+	}
+	
+	// we can find shortest path from source to verices using topological sort in a Directed Acyclic Graph, below is  simple impl (not applicable for Cyclic graph)
+	/** The reason why this works with top sort is, when nodes are topologically sorted and we pick a start node for topological order, there is no way we can go backward in that order, this is the reason why this will not work when we randomly pick the nodes*/
+	public Map<String, Integer> getShortestPaths(String src) {
+		Stack<Vertex> topOrd = topSort(null);
+		Collections.reverse(topOrd);
+		
+		// initialize a map which holds the shortest paths from src to all orther vertices
+		Map<String, Integer> distMap = new HashMap<>();
+		// update the distance of src as 0
+		distMap.put(src, 0);
+		for (int i=0; i<vrtxMap.size(); i++) {
+			Vertex v = topOrd.get(i);
+			// start from src vrtx, src will have a non null value of distance in map
+			if(distMap.get(v.label) != null) {
+				// explore all the neighbors and update the distances of them
+				for(Edge ae : v.edges) {
+					// total cost to get to av would we cost(weight) of v + ae
+					double edgeWeight = ae.getEdgeWeight();
+					double dist = edgeWeight + distMap.get(v.label);
+					int minDist = (int) Math.min(distMap.getOrDefault(ae.v2.label, Integer.MAX_VALUE), dist);	
+					distMap.put(ae.v2.label, minDist);
+					
+				}
+			}
+		}
+		// if we want the longest distance, we can negate all he weights, find the shortest paths, and negate them again
+		System.out.println(distMap);
+		return distMap;
+	}
 
 }
+
