@@ -67,7 +67,7 @@ public class TestGraph {
 		dag.doTopologicOrdering(null); */
 		// DAG with weights
 		Graph dwg = new Graph();
-		dwg.addEdge("A", "B", true, 3);
+		/* dwg.addEdge("A", "B", true, 3);
 		dwg.addEdge("A", "C", true, 6);
 		dwg.addEdge("B", "C", true, 4);
 		dwg.addEdge("B", "D", true, 4);
@@ -79,11 +79,22 @@ public class TestGraph {
 		dwg.addEdge("D", "G", true, 2);
 		dwg.addEdge("E", "H", true, 9);
 		dwg.addEdge("F", "H", true, 1);
-		dwg.addEdge("G", "H", true, 2);
+		dwg.addEdge("G", "H", true, 2); */
+		
+		dwg.addEdge("A", "B", true, 4);
+		dwg.addEdge("A", "C", true, 1);
+		dwg.addEdge("C", "B", true, 2);
+		dwg.addEdge("C", "D", true, 5);
+		dwg.addEdge("B", "D", true, 1);
+		dwg.addEdge("B", "E", true, 6);
+		dwg.addEdge("D", "E", true, 3);
 		
 		for(Vertex v: dwg.getVertexAllVertices().keySet()) {
 			  System.out.println(v.getLabel()+" "+v.getEdgeSet()); }
-		dwg.getShortestPaths("B");
+		dwg.dijkstrasShortestPaths("A", null);
+		dwg.dijkstrasShortestPathsEagerImpl("A", "E");
+		dwg.getShortestPath("A", "E");
+		//dwg.getShortestPaths("A");
 		
 	}
 

@@ -9,8 +9,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.Stack;
+
+import practice.algo.IndexedMinheap.Node;
 
 // Undirected graph and Directed graph
 public class Graph {
@@ -376,6 +379,7 @@ public class Graph {
 		return pathList;
 	}
 	
+	// works only for unweighted directed and un directed graph
 	public List<String> getShortestPath(String src, String dstn) {
 		LinkedList<String> actualPath = new LinkedList<>();
 		Vertex dstnVrtx = vrtxMap.get(dstn);
@@ -389,7 +393,7 @@ public class Graph {
 			for(int i=pathList.size()-2; i>=0; i--) {
 				Vertex v = (Vertex)pathList.get(i)[0];
 				int lvl = (int) pathList.get(i)[1];
-				if(allVrtx.get(dstnVrtx).contains(v) && lvl != prevLvl) {
+				if(allVrtx.get(v).contains(dstnVrtx) && lvl != prevLvl) {
 					//System.out.print(" ---> "+v.label);
 					actualPath.push(v.label);
 					prevLvl = lvl;
@@ -475,6 +479,143 @@ public class Graph {
 		// if we want the longest distance, we can negate all he weights, find the shortest paths, and negate them again
 		System.out.println(distMap);
 		return distMap;
+	}
+	
+	// Dijkstra's single source shortest path (Dijkstra's not applicable for -ve edge weights). We can stop early if we have a distnation 
+	// this is a lazy implementation, i.e, if we find a better distance for a vertex we insert a new entry in PQ instead of updating the older entry. This can be a problem for dense graph
+	public Object[] dijkstrasShortestPaths(String src, String end){
+		Map<String,Integer> distMap = new HashMap<>();
+		// map to reconstruct the path, vertex and parent relation
+		Map<String,String> path = new HashMap<String, String>();
+		Vertex srcv = vrtxMap.get(src);
+		if(srcv != null) {
+			// create a min heap priority queue which holds vertex and distance from srcv to it,  wrap these two in Node class
+			class VertexNode{
+				Vertex vrtx;
+				int dist;
+				public VertexNode(Vertex vrtx, int dist) {
+					this.vrtx = vrtx;
+					this.dist = dist;
+				}
+			}
+
+			PriorityQueue<VertexNode> pq = new PriorityQueue<>(2*vrtxMap.keySet().size(), (n1,n2)->n1.dist-n2.dist);
+			
+			Set<String> visited = new HashSet<String>();
+			pq.offer(new VertexNode(srcv, 0));
+			distMap.put(src, 0);
+			
+			while (! pq.isEmpty()) {
+				VertexNode vn = pq.poll();
+				Vertex v = vn.vrtx;
+				visited.add(v.label);
+				int srcDist = vn.dist;
+				// We already found a better path before we got to processing this node so we can ignore it
+				if(distMap.getOrDefault(v.label, Integer.MAX_VALUE) < srcDist) continue;
+				// explore all the adjcent edges
+				for(Edge e : v.edges) {
+					if (!visited.contains(e.getDestinationVertex().label)) {
+						int newDist = (int) (srcDist + e.getEdgeWeight());
+						if(newDist < distMap.getOrDefault(e.getDestinationVertex(), Integer.MAX_VALUE)) {
+							distMap.put(e.getDestinationVertex().label, newDist);
+							pq.offer(new VertexNode(e.getDestinationVertex(), newDist));
+							// e.v2's parent will be V, add it to the path map
+							path.put(e.v2.label, v.label);
+						}
+					}
+				}
+				
+				// if we have an end vertex, we don't need to visit all vertices instead we can stop once we visit all vertex going out from end vertex.
+				// this is because, the way select vertices from heap, we always select the best possible path. Once we poll out the end vertex means
+				// we got the shortest path to end vertex from src
+				if(v.label.equals(end)) {
+					System.out.println(distMap);
+					// wrap the path map and dist map in obj array and return for reconstructing path
+					return new Object[] {distMap, path};
+				}
+				
+				
+			}
+		}
+		System.out.println(distMap);
+		// wrap the path map and dist map in obj array and return for reconstructing path
+		return new Object[] {distMap, path};
+	}
+	
+	// Dijkstra eager implementation
+	
+	public Object[] dijkstrasShortestPathsEagerImpl(String src, String end){
+		Map<String,Integer> distMap = new HashMap<>();
+		// map to reconstruct the path, vertex and parent relation
+		Map<String,String> path = new HashMap<String, String>();
+		Vertex srcv = vrtxMap.get(src);
+		if(srcv != null) {
+			// create a min heap priority queue which holds vertex and distance from srcv to it,  wrap these two in Node class
+
+			IndexedMinheap<Vertex> pq = new IndexedMinheap<>(2*vrtxMap.keySet().size());
+			
+			Set<String> visited = new HashSet<String>();
+			pq.add(srcv, 0);
+			distMap.put(src, 0);
+			
+			while (! pq.isEmpty()) {
+				IndexedMinheap<Vertex>.Node vn = pq.extractMin();
+				Vertex v = vn.key;
+				visited.add(v.label);
+				int srcDist = vn.weight;
+				// We already found a better path before we got to processing this node so we can ignore it
+				if(distMap.getOrDefault(v.label, Integer.MAX_VALUE) < srcDist) continue;
+				// explore all the adjcent edges
+				for(Edge e : v.edges) {
+					if (!visited.contains(e.getDestinationVertex().label)) {
+						int newDist = (int) (srcDist + e.getEdgeWeight());
+						if(newDist < distMap.getOrDefault(e.getDestinationVertex(), Integer.MAX_VALUE)) {
+							distMap.put(e.getDestinationVertex().label, newDist);
+							Integer cw = pq.getWeight(e.getDestinationVertex());
+							// if this vertex is already there in PQ and we encounter a better distance for this then just update the distance insted of new insertion
+							if(cw != null && cw > newDist) {
+								pq.decreaseKey(e.getDestinationVertex(), newDist);
+							} else {
+								pq.add(e.getDestinationVertex(), newDist);
+							}
+							// e.v2's parent will be V, add it to the path map
+							path.put(e.v2.label, v.label);
+						}
+					}
+				}
+				
+				// if we have an end vertex, we don't need to visit all vertices instead we can stop once we visit all vertex going out from end vertex.
+				// this is because, the way select vertices from heap, we always select the best possible path. Once we poll out the end vertex means
+				// we got the shortest path to end vertex from src
+				if(v.label.equals(end)) {
+					System.out.println(distMap);
+					// wrap the path map and dist map in obj array and return for reconstructing path
+					return new Object[] {distMap, path};
+				}
+				
+				
+			}
+		}
+		System.out.println(distMap);
+		// wrap the path map and dist map in obj array and return for reconstructing path
+		return new Object[] {distMap, path};
+	}
+	
+	
+	public void getShortestPathByDijkstra(String src, String dstn) {
+		Object[] dijr = dijkstrasShortestPaths(src, dstn);
+		HashMap<String,String> path = (HashMap<String, String>) dijr[1];
+		Stack<String> ps = new Stack<String>();
+		// reconstruct path from dstn to src
+		String end = dstn;
+		ps.push(end);
+		while(path.get(dstn) != null) {
+			String prnt = path.get(dstn);
+			ps.push(prnt);
+			dstn = prnt;
+		}
+		Collections.reverse(ps);
+		System.out.println(ps);
 	}
 
 }
