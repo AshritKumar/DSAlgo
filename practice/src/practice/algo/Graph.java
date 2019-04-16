@@ -28,6 +28,7 @@ public class Graph {
 		return vrtxMap;
 	}
 	
+	// not a good name, but let it be....
 	public Map<Vertex, Set<Vertex>> getVertexAllVertices(){
 		return allVrtx;
 	}
@@ -616,6 +617,39 @@ public class Graph {
 		}
 		Collections.reverse(ps);
 		System.out.println(ps);
+	}
+	
+	// Applies only to undirected graphs
+	public boolean isCyclic() {
+		boolean isCyclic = false;
+		Set<Vertex> visited = new HashSet<Vertex>();
+		// for all disconnected vertces also, thus the for loop
+		for(Vertex v : allVrtx.keySet()) {
+			if(! visited.contains(v)) {
+				isCyclic = isCyclicUtil(visited, v, null);
+				if(isCyclic)
+					return true;
+			}
+		}
+		return isCyclic;
+		
+	}
+
+	private boolean isCyclicUtil(Set<Vertex> visited, Vertex v, Vertex parent) {
+		visited.add(v);
+		// explore neighbours
+		for(Vertex adjv : allVrtx.get(v)) {
+			// if adj vertex is the parent continue
+			if(adjv.equals(parent))
+				continue;
+			// if adj vertex is not parent but is i visited set the we have a cycle
+			if(visited.contains(adjv))
+				return true;
+			// recursive call for all adj vertices
+			if (isCyclicUtil(visited, adjv, v))
+				return true;
+		}
+		return false;
 	}
 
 }

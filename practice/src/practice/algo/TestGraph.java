@@ -4,8 +4,33 @@ import practice.algo.Graph.Vertex;
 
 public class TestGraph {
 	public static void main(String[] args) {
+		testGraphCycle();
+		
+	}
+	
+	public static void testGraphCycle() {
+		Graph g = createUndirectedACyclicGraph();
+		System.out.println(g.isCyclic());
+	}
+	
+	public static void testDfsAndBfs() {
 		// undirected cyclic graph
-	/*	Graph g = new Graph();
+		Graph g = createUndirectedCyclicGraph();
+			
+		System.out.println(g);
+			
+		for(Vertex v : g.getVertexAllVertices().keySet()) 
+		  System.out.println(v.getLabel()+" "+v.getEdgeSet());
+			 
+			g.doDFSTraverse("England");
+			//g.BFSIter(g.vrtxMap.get("Mumbai"), g.vrtxMap.get("NewYork"));
+			g.getShortestPath("Falaknuma", "Mumbai");
+			
+	}
+	
+	public static Graph createUndirectedCyclicGraph() {
+		// undirected cyclic graph
+		Graph g = new Graph();
 		g.addEdge("Mumbai", "Pune", false);
 		g.addEdge("Mumbai", "Hyderabad", false);
 		
@@ -30,19 +55,26 @@ public class TestGraph {
 		g.addEdge("Yangon", "Port Blair", false);
 		g.addEdge("Port Blair", "Interview Island", false);
 		g.addEdge("Interview Island","Subashgram", false);
+		return g;
+	}
+	
+	public static Graph createUndirectedACyclicGraph() {
+		// undirected Acyclic graph
+		Graph g = new Graph();
+		g.addEdge("Mumbai", "Pune", false);
+		g.addEdge("Mumbai", "Hyderabad", false);
 		
-	//	System.out.println(g);
+		g.addEdge("Hyderabad", "Malakpet", false);
 		
-		/*
-		 * for(Vertex v : g.allVrtx.keySet()) System.out.println(v.label+" "+v.edges);
-		 */
-		//g.doDFSTraverse("England");
-		//g.BFSIter(g.vrtxMap.get("Mumbai"), g.vrtxMap.get("NewYork"));
-		//g.getShortestPath("Falaknuma", "Mumbai");
+		g.addEdge("England", "Pune", false);
 		
-		
+		return g;
+	}
+	
+	
+	public static void testGraphTopSort() {
 		// Directed AcyclicGraph
-		/*
+				
 		Graph dag = new Graph();
 		dag.addEdge("A", "D", true);
 		dag.addEdge("B", "D", true);
@@ -64,38 +96,41 @@ public class TestGraph {
 		  System.out.println(v.getLabel()+" "+v.getEdgeSet()); }
 		 
 		
-		dag.doTopologicOrdering(null); */
+		dag.doTopologicOrdering(null); 
+	}
+	
+	public static void testGraphDijkstras() {
 		// DAG with weights
-		Graph dwg = new Graph();
-		/* dwg.addEdge("A", "B", true, 3);
-		dwg.addEdge("A", "C", true, 6);
-		dwg.addEdge("B", "C", true, 4);
-		dwg.addEdge("B", "D", true, 4);
-		dwg.addEdge("B", "E", true, 11);
-		dwg.addEdge("C", "D", true, 8);
-		dwg.addEdge("C", "G", true, 11);
-		dwg.addEdge("D", "E", true, -4);
-		dwg.addEdge("D", "F", true, 5);
-		dwg.addEdge("D", "G", true, 2);
-		dwg.addEdge("E", "H", true, 9);
-		dwg.addEdge("F", "H", true, 1);
-		dwg.addEdge("G", "H", true, 2); */
-		
-		dwg.addEdge("A", "B", true, 4);
-		dwg.addEdge("A", "C", true, 1);
-		dwg.addEdge("C", "B", true, 2);
-		dwg.addEdge("C", "D", true, 5);
-		dwg.addEdge("B", "D", true, 1);
-		dwg.addEdge("B", "E", true, 6);
-		dwg.addEdge("D", "E", true, 3);
-		
-		for(Vertex v: dwg.getVertexAllVertices().keySet()) {
-			  System.out.println(v.getLabel()+" "+v.getEdgeSet()); }
-		dwg.dijkstrasShortestPaths("A", null);
-		dwg.dijkstrasShortestPathsEagerImpl("A", "E");
-		dwg.getShortestPath("A", "E");
-		//dwg.getShortestPaths("A");
-		
+			Graph dwg = new Graph();
+			dwg.addEdge("A", "B", true, 3);
+			dwg.addEdge("A", "C", true, 6);
+			dwg.addEdge("B", "C", true, 4);
+			dwg.addEdge("B", "D", true, 4);
+			dwg.addEdge("B", "E", true, 11);
+			dwg.addEdge("C", "D", true, 8);
+			dwg.addEdge("C", "G", true, 11);
+			dwg.addEdge("D", "E", true, -4);
+			dwg.addEdge("D", "F", true, 5);
+			dwg.addEdge("D", "G", true, 2);
+			dwg.addEdge("E", "H", true, 9);
+			dwg.addEdge("F", "H", true, 1);
+			dwg.addEdge("G", "H", true, 2); 
+			
+			dwg.addEdge("A", "B", true, 4);
+			dwg.addEdge("A", "C", true, 1);
+			dwg.addEdge("C", "B", true, 2);
+			dwg.addEdge("C", "D", true, 5);
+			dwg.addEdge("B", "D", true, 1);
+			dwg.addEdge("B", "E", true, 6);
+			dwg.addEdge("D", "E", true, 3);
+			
+			for(Vertex v: dwg.getVertexAllVertices().keySet()) {
+				  System.out.println(v.getLabel()+" "+v.getEdgeSet()); }
+			dwg.dijkstrasShortestPaths("A", null);
+			dwg.dijkstrasShortestPathsEagerImpl("A", "E");
+			dwg.getShortestPath("A", "E");
+			//dwg.getShortestPaths("A");
+			
 	}
 
 }
