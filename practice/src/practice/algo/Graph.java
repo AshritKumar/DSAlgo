@@ -1,5 +1,6 @@
 package practice.algo;
 
+import java.time.chrono.IsoChronology;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -623,7 +624,7 @@ public class Graph {
 	public boolean isCyclic() {
 		boolean isCyclic = false;
 		Set<Vertex> visited = new HashSet<Vertex>();
-		// for all disconnected vertces also, thus the for loop
+		// for all disconnected vertices also, thus the for loop
 		for(Vertex v : allVrtx.keySet()) {
 			if(! visited.contains(v)) {
 				isCyclic = isCyclicUtil(visited, v, null);
@@ -650,6 +651,57 @@ public class Graph {
 				return true;
 		}
 		return false;
+	}
+	
+	// for directed graph
+	public boolean isCyclicDG() {
+		boolean isCyclic = false;
+		Set<Vertex> visited = new HashSet<Vertex>();
+		HashMap<Vertex,Vertex> pm = new HashMap<>();
+		Set<Vertex> curRecurSet = new HashSet<Vertex>();
+		// for all disconnected vertices also, thus the for loop
+		for(Vertex v : allVrtx.keySet()) {
+			if(! visited.contains(v)) {
+				isCyclic = isCyclicDGUtil(v, visited, curRecurSet, pm, null, isCyclic);
+			}
+		}
+		return isCyclic;
+	}
+
+	private boolean isCyclicDGUtil(Vertex v, Set<Vertex> visited, Set<Vertex> curRecurSet, HashMap<Vertex, Vertex> pm, Vertex parent, boolean hasCycle) {
+		visited.add(v);
+		pm.put(v, parent);
+		curRecurSet.add(v);
+		for(Vertex adjv : allVrtx.get(v)) {
+			if(! visited.contains(adjv)) {
+				if(isCyclicDGUtil(adjv, visited, curRecurSet, pm, v,hasCycle)) {
+					System.out.println("cycle found ... ");
+					printCycle(pm,adjv);
+					hasCycle = true;
+				}
+			} // if a vertex is already visited and is there in the current recursion set then we have a cycle.
+			else if(curRecurSet.contains(adjv)) {
+				hasCycle = true;
+				return true;
+			}
+		}
+		// once all the nodes are visited for this vertex, remove it from the current recursion set.
+		curRecurSet.remove(v);
+		return hasCycle;
+	}
+
+	private void printCycle(HashMap<Vertex, Vertex> pm, Vertex adjv) {
+		Vertex sv = adjv;
+		System.out.print(adjv);
+		while(pm.get(adjv) != null) {
+			adjv = pm.get(adjv);
+			System.out.print( " <-- "+adjv);
+			if(sv.equals(adjv))
+				break;
+		}
+		System.out.print(" <-- "+sv);
+		System.out.println();
+		
 	}
 
 }

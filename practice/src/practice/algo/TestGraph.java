@@ -1,16 +1,33 @@
 package practice.algo;
 
+import java.util.ArrayList;
+
 import practice.algo.Graph.Vertex;
 
 public class TestGraph {
+
 	public static void main(String[] args) {
-		testGraphCycle();
-		
+		//testGraphCycle();
+		testCycleDirected();
 	}
 	
-	public static void testGraphCycle() {
+	public static void testGraphCycleUndirected() {
 		Graph g = createUndirectedACyclicGraph();
 		System.out.println(g.isCyclic());
+	}
+	
+	public static void testCycleDirected() {
+		Graph dg = new Graph();
+		dg.addEdge("X", "D", true);
+		dg.addEdge("D", "A", true);
+		dg.addEdge("A", "B", true);
+		dg.addEdge("C", "D", true);
+		dg.addEdge("C", "B", true);
+		
+		dg.addEdge("B", "D", true);
+		dg.addEdge("A", "C", true);
+		
+		System.out.println(dg.isCyclicDG());
 	}
 	
 	public static void testDfsAndBfs() {
